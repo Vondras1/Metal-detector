@@ -28,7 +28,7 @@ fprintf(myScope, 'DAT:SOU CH1');
 
 fprintf(myScope, 'HOR:RECO 100000');
 
-fprintf(myScope, 'HOR:SCA 0.1 ');
+fprintf(myScope, 'HOR:SCA 1 ');
 
 fprintf(myScope, 'DATA:START 1');
 
@@ -82,8 +82,9 @@ fclose(myScope);
 % Clear the variable
 clear myScope;
 
+%load('bronze_sweep_pose_1.mat');
 % Plot the acquired data and add axis labels
-%clf;
+clf;
 plot(data_ch1);
 hold on
 plot(data_ch2);
