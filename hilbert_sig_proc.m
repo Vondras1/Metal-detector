@@ -16,9 +16,9 @@ subplot(2,1,2)
 title("pose 2 and 4")
 hold on;
 for pose=[2 4]
-    plot_data("iron", pose, 'c');
-    plot_data("brass", pose, 'm');
-    plot_data("bronze", pose,'y');
+    plot_data("iron", pose, 'r');
+    plot_data("brass", pose, 'g');
+    plot_data("bronze", pose,'b');
 end
 legend("iron", "brass", "bronze");
 
