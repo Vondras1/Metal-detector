@@ -14,19 +14,26 @@
 clear all;
 clc;
 
-synthetic_data = true;
+synthetic_data = false;
 
 if (synthetic_data == false)
-    fs = 100000;         % sampling frequency (Hz)
-    f0 = 1000;           % cerrier frequency (Hz)
 
-    with = "with_obj_sine1khz.mat";
-    without = "without_obj_sine1khz.mat";
+    data_path = "singlefreq_data/bronze_8k_pose_2.mat";
+    fs = 1e6;         % sampling frequency (Hz)
+    f0 = 8e3;         % cerrier frequency (Hz)
 
-    reference_signal_I = load("without_obj_sine1khz.mat").data_ch1;
-    reference_signal_Q = [zeros(25,1)', reference_signal_I(1:(end-25))]; % Shift by 90° 
+%     data_path = "with_obj_sine1khz.mat";
+%     fs = 1e5;         % sampling frequency (Hz)
+%     f0 = 1e3;         % cerrier frequency (Hz)
+
+    % Count the number of samples required to shift the signal by 90°
+    n_period = floor(fs/f0); % number of samples per period
+    k_shift = floor(n_period / 4); % number of samples to shift signal by 90°
+
+    reference_signal_I = load(data_path).data_ch1;
+    reference_signal_Q = [zeros(k_shift,1)', reference_signal_I(1:(end-k_shift))]; % Shift by 90° 
     
-    measured_signal = load("without_obj_sine1khz.mat").data_ch2;
+    measured_signal = load(data_path).data_ch2;
 else
     fs = 10000;         % sampling frequency (Hz)
     f0 = 1000;          % cerrier frequency (Hz)
@@ -69,7 +76,6 @@ fprintf('Method1, Etimated phase shift:   %f deg\n', rad2deg(phase_estimated));
 % fprintf('Difference (error):           %f rad\n', phase_estimated - phase_shift);
 
 %% Second method - FFT
-
 reference = fft(reference_signal_I);
 measured = fft(measured_signal);
 
@@ -92,20 +98,38 @@ phase_measured = angle(measured(measured_idx));
 reference_idx = freq_indices(reference_max_idx);
 phase_reference = angle(reference(reference_idx));
 
-% [~, f0_index] = min(abs(f_axis - f0))
-
 phase_diff = rad2deg(phase_measured - phase_reference);
 
-fprintf("FFT, Estimated phase shift: %f deg\n", phase_diff);
+phase_diff_rad = wrapToPi(phase_measured - phase_reference);
+phase_diff_deg = rad2deg(phase_diff_rad);
+
+fprintf("FFT, Estimated phase shift: %f deg\n", phase_diff_deg);
+figure(2);
+subplot(2, 1, 1)
+plot(abs(measured), 'b', 'LineWidth', 1);
+hold on;
+plot(abs(reference), 'r', 'LineWidth', 1);
+legend('measured', 'reference');
 
 %% Plot signals
 figure(1);
-plot(measured_signal, 'b', 'LineWidth', 1); % Measured signal
+plot(load("singlefreq_data/bronze_8k_pose_4.mat").data_ch2, 'b', 'LineWidth', 0.7); % Measured signal
 hold on;
-plot(reference_signal_I, 'r', 'LineWidth', 1); % Reference signal
+plot(load("singlefreq_data/iron_8k_pose_4.mat").data_ch2, 'r', 'LineWidth', 0.7); % Reference signal
+plot(load("singlefreq_data/brass_8k_pose_4.mat").data_ch2, 'c', 'LineWidth', 0.7); % Reference signal
 title('Signals');
 xlabel('Sample index');
 ylabel('Amplitude');
-legend('Measured signal', 'reference signal');
-xlim([0, 1000]);
+legend('bronze signal', 'iron signal', 'brass signal');
+xlim([0, 2000]);
+ylim([-0.05, 0.05]);
+
 grid on;
+
+%%
+function y = petersFilter(x, fs, f0)
+    order = 4;
+    Wn = f0 / (fs/2);
+    [b, a] = butter(order, Wn, 'low');
+    y = filtfilt(b, a, x);
+end
