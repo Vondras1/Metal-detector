@@ -5,6 +5,8 @@
 % Clear MATLAB workspace of any previous instrument connections
 NUM_SAMPLES = 1e5;
 
+close all;
+
 instrreset;
 
 % change this to match oscilloscope address

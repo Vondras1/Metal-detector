@@ -1,5 +1,16 @@
 close all;
 
+% figure(2)
+% hold on;
+% plot_data("iron", pose, 'r');
+% plot_data("brass", pose, 'g');
+% plot_data("bronze", pose,'b');
+% plot_data("empty", pose,'y');
+% plot_data("irononbox", pose,'c');
+% plot_data("emptyonbox", pose,'m');
+% 
+% legend("iron", "brass", "bronze", "empty", "ironbox", "emptybox");
+
 figure(1)
 subplot(2,1,1)
 title("pose 1 and 3")
@@ -51,6 +62,7 @@ function plot_data(material, pose, color)
     t = 0:1/fs:0.1-1/fs;
     degpoly = 2;
     data = load(sprintf("sweep_data/%s_sweep_pose_%d.mat", material, pose));
+    %data = load(sprintf("dcoil_sweep_%s_half.mat", material));
     
     [exc, pic] = get_filtered_signals(data);
     
